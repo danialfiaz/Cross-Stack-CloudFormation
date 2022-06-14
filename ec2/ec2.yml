@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  ImageID:
+    Type: String
+    Default: "ami-0022f774911c1d690"
+  InstanceType:
+    Type: String
+    Default: "t2.micro"
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: "danial"
+  
+
+
+
+Resources:
+  EC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      ImageId: !Ref ImageID
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      SecurityGroupIds:
+        - !GetAtt SecurityGroup.GroupId
+      SubnetId: !ImportValue PublicSubnet1ID
+      Tags: 
+        - Key: Name
+          Value: MyInstance
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: security group for ec2 instance
+      GroupName: MyEC2InstanceSG
+      SecurityGroupEgress: 
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+      Tags:
+        - Key: Name
+          Value: InstanceSG
+      VpcId: !ImportValue VPCID
